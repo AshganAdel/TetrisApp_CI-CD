@@ -1,0 +1,82 @@
+name: 'Terraform or Ansible'
+run-name: ${{inputs.action}}
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Please Select The Command To Run { plan , apply, destroy }'
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+          - ansible
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  Terraform:
+    if: ${{ inputs.action != 'ansible' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v3
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+        aws-region: eu-north-1
+    - name: setup Terraform
+      uses: hashicorp/setup-terraform@v3
+    - name: Terraform Init
+      run: terraform init --var-file=var.tfvars
+      working-directory: terraform
+    - name: Terraform Plan
+      if: ${{ inputs.action == 'plan' }}
+      run: terraform plan --var-file=var.tfvars
+      working-directory: terraform
+    - name: Terraform Apply
+      if: ${{ inputs.action == 'apply' }}
+      run: terraform apply -auto-approve --var-file=var.tfvars
+      working-directory: terraform
+    - name: Terraform Destroy
+      if: ${{ inputs.action == 'destroy' }}
+      run: terraform destroy -auto-approve --var-file=var.tfvars
+      working-directory: terraform
+  ansible:
+    if: ${{ inputs.action == 'ansible' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+          aws-region: eu-north-1
+      - name: add sshkey 
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip
+          pip3 install ansible boto3 botocore 
+          ansible-galaxy collection install amazon.aws
+      - name: Run Ansible Playbook
+        run: |
+          ansible-inventory -i aws_ec2.yml --list \
+          | jq -r '
+            ._meta.hostvars
+            | to_entries[]
+            | .value.ansible_host
+            | if type=="object" then .__ansible_unsafe else . end
+          ' | xargs -I{} ssh-keyscan -H {} >> ~/.ssh/known_hosts
+          ansible-playbook playbook.yml --vault-password-file <(echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}")
+        working-directory: ansible
+      

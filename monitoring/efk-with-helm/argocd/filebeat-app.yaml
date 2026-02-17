@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: filebeat
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/mernathawyy/efk-with-helm
+    targetRevision: main
+    path: filebeat
+    helm:
+      valueFiles:
+        - values-custom.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: efk
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

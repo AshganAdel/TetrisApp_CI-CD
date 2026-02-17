@@ -1,0 +1,19 @@
+- name: k8s setup 
+  hosts: all
+  vars_files:
+    - secrets.yml
+    - vars.yml
+  roles:
+    - install_java
+    - docker
+    - awscli
+    - kubectl
+    - helm
+    - argocd
+    
+    
+ 
+
+
+
+

@@ -1,0 +1,13 @@
+[
+  {
+    "labels": {
+      "alertname": "TestEmail",
+      "severity": "critical"
+    },
+    "annotations": {
+      "summary": "Test Alert",
+      "description": "Testing email alert"
+    },
+    "startsAt": "2026-02-03T19:30:00Z"
+  }
+]

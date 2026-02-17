@@ -1,0 +1,28 @@
+
+replicas: 1
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "1Gi"
+  limits:
+    cpu: "500m"
+    memory: "1.5Gi"
+
+# لتجربة single-node
+discovery.type: single-node
+
+# Volume claim (لو مش عايزة تخزني بيانات كبيرة ممكن تبسيطها)
+volumeClaimTemplate:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 2Gi
+
+
+
+
+# عدد النسخ
+# Volume – هنخليها emptyDir بدل PVC
+#volumeClaimTemplate: {}  # مش هنستخدم Storage مؤقتًا
+
