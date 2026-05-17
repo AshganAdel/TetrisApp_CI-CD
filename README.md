@@ -175,6 +175,20 @@ Creates:
 * Policies
 * Service accounts
 
+### Terraform Remote Backend
+
+Terraform state management is configured using:
+
+Amazon S3 bucket for remote state storage
+DynamoDB table for state locking
+
+This setup provides:
+
+Centralized state management
+Team collaboration support
+State consistency
+Protection against concurrent Terraform operations
+
 ---
 
 # GitHub Actions for Infrastructure
@@ -395,12 +409,10 @@ Developer Push → GitHub → Jenkins Pipeline → Security & Quality Checks
 
 Potential future enhancements:
 
-* Prometheus & Grafana monitoring
 * Helm charts
 * Blue/Green deployments
 * Canary deployments
 * Kubernetes autoscaling
-* Secrets management with Vault
 * Service mesh integration
 * Multi-environment deployments
 
