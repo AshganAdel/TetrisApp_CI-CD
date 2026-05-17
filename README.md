@@ -1,252 +1,423 @@
-#    🟪
-#  🟪🟪🟪 Tetris Game Full Deployment    
+#   Full Deployment    
 
-This project deploys a complete AWS infrastructure including VPC, EC2 instance, Security Groups, EKS cluster, and ECR repository using Terraform. The deployment uses modules for reusability and stores state securely in S3 with DynamoDB for locking.
- Terraform AWS Infrastructure – Detailed Documentation
+# 🟪🟪🟪 Tetris Game CI/CD & GitOps Deployment on AWS EKS
 
-📐 **Architecture Diagram:** 
+## Overview
 
-Here is the main architecture of the project:
+This project demonstrates a complete end-to-end DevOps platform using:
+
+* GitHub
+* Jenkins
+* GitHub Actions
+* Terraform (Custom Modules)
+* Ansible
+* SonarQube
+* OWASP Dependency Check
+* Docker
+* Amazon ECR
+* Amazon EKS
+* ArgoCD
+* Redis
+* Kubernetes
+
+The platform automates:
+
+* Infrastructure provisioning
+* CI/CD pipeline execution
+* Security scanning
+* Code quality validation
+* Docker image build & push
+* GitOps-based Kubernetes deployments
+* Monitoring of test and coverage reports
+
+The architecture follows GitOps and Infrastructure as Code (IaC) practices for scalability, automation, and consistency.
+
+---
+
+# Architecture
+[![CI/CD Architecture](https://drive.google.com/uc?export=view&id=1XkvzML7RFgPQAY3yKgDshVIERBpVEyqq)](https://drive.google.com/file/d/1XkvzML7RFgPQAY3yKgDshVIERBpVEyqq/view)
+
+## High-Level Workflow
+
+1. Developers push code to GitHub.
+2. GitHub webhook triggers Jenkins pipeline.
+3. Jenkins pipeline:
+
+   * Installs dependencies
+   * Runs OWASP dependency scanning
+   * Executes unit tests
+   * Generates npm coverage reports
+   * Runs SonarQube analysis & quality gates
+   * Builds Docker image
+   * Pushes image to Amazon ECR
+   * Updates Kubernetes manifests
+   * Publishes reports in Jenkins
+4. ArgoCD detects manifest changes.
+5. ArgoCD deploys application updates to Amazon EKS.
+6. Users access the application through ELB + Kubernetes Ingress.
+
+Infrastructure provisioning is fully automated using Terraform custom modules and configured using Ansible.
+
+---
+
+# Project Structure
+
+```bash
+.
+├── app-repo/                  # Application source code
+├── infra-repo/                # Terraform + Ansible infrastructure code
+├── k8s-repo/                  # Kubernetes manifests
+├── Jenkinsfile                # Jenkins CI/CD pipeline
+├── terraform/
+│   ├── modules/
+│   │   ├── vpc/
+│   │   ├── eks/
+│   │   ├── ec2/
+│   │   ├── ecr/
+│   │   └── iam/
+│   └── environments/
+├── ansible/
+│   ├── playbooks/
+│   ├── roles/
+│   └── inventory/
+└── README.md
+```
+
+---
+
+# Infrastructure Architecture
 ![Architecture Diagram](https://drive.google.com/uc?export=view&id=1HKmOLXlfygEcMnTrHGCBOmLEUaT1gc0H)
 
-# 📌 Table of Contents
+## AWS Services Used
 
- 1. 🧰 Prerequisites
+* Amazon VPC
+* Amazon EC2
+* Amazon EKS
+* Amazon ECR
+* Elastic Load Balancer (ELB)
+* IAM
+* Route Tables
+* Security Groups
 
-2. 🗂️ Project Structure
+---
 
-3. 🧩 Modules Overview
+## VPC Design
 
-    - 🌐 VPC
+The infrastructure is deployed inside a custom VPC containing:
 
-    - 🖥️ EC2
+| Subnet           | Type    | Purpose              |
+| ---------------- | ------- | -------------------- |
+| Public Subnet    | Public  | Jenkins EC2 Instance |
+| Private Subnet 1 | Private | EKS Worker Node      |
+| Private Subnet 2 | Private | EKS Worker Node      |
+| Private Subnet 3 | Private | EKS Worker Node      |
 
-    - 🔐 Security Group
+---
 
-    - ☸️ EKS
+## EKS Cluster
 
-    - 📦 ECR
+The Kubernetes cluster contains:
 
-4- ⚙️ Variables
+* 3 worker nodes
+* One node deployed in each private subnet
+* Application workloads
+* Redis deployment
+* ArgoCD deployment
+* Ingress Controller
 
-5- 💾 Terraform Backend
+---
 
-6- ▶️ How to Run
+# Terraform Infrastructure Provisioning
 
-7- 🧪 Example Deployment Flow
+Infrastructure provisioning is implemented using reusable Terraform custom modules.
 
+## Terraform Modules
 
-# 🧰 Prerequisites
+### VPC Module
 
-  Before running this project, make sure you have:
+Creates:
 
-1- Terraform v1.5+
+* VPC
+* Public subnet
+* 3 private subnets
+* Internet Gateway
+* Route tables
+* NAT Gateway
 
-2- AWS CLI configured (aws configure)
+### EC2 Module
 
-3- AWS account with IAM permissions
+Creates:
 
-4- Existing:
+* Jenkins EC2 instance
+* Security groups
+* SSH access
 
-   - 🪣 S3 bucket (for state)
+### ECR Module
 
-  - 🔒 DynamoDB table (for state locking)
+Creates:
 
-5- EC2 Key Pair (for SSH access)
+* Amazon ECR repositories
 
-# 🗂️ Project Structure
- ```text
-.
-├── main.tf              # Calls all modules
-├── variables.tf         # Variable definitions
-├── terraform.tf         # Backend configuration
-├── terraform.tfvars     # Actual variable values
-└── modules/
-    ├── vpc/
-    ├── ec2/
-    ├── security_group/
-    ├── eks/
-    └── ecr/
-```
-# 🧩 Modules Overview
-1- **🌐 VPC Module**
+### EKS Module
 
-📍 Path: modules/vpc
-  
-  Creates:
-   - VPC
-   - Public subnet
-   - Private subnets
-   - Internet Gateway
-   - NAT Gateway
-  
-  Inputs:
+Creates:
 
-    Variable                 	Description
-    cidr_vpc	                VPC CIDR block
-    cidr_private	            List of private subnet CIDRs
-    public_subnet_cidr      	Public subnet CIDR
-    name_private	            Names of private subnets
-    name_public	             Name of public subnet
-    vpc_name	                VPC name
-    igw	                     Internet Gateway name
+* EKS cluster
+* Managed node groups
+* IAM roles
+* Kubernetes networking
 
- Outputs:
+### IAM Module
 
-   - vpc_id
-   -  private_subnet_id
-   -   public_subnet_id
-     
-2- **🖥️ EC2 Module**
+Creates:
 
-📍 Path: modules/ec2
-  
-  Creates:
-   - EC2 instance in public subnet
+* IAM roles
+* Policies
+* Service accounts
 
-  Inputs:
+---
 
-    Variable	                  Description
-    subnet_id	                  Subnet ID
-    public_ip_or_not	           Assign public IP
-    ami                        	AMI ID
-    volume_size	                Root volume size (GB)
-    key_name	                   SSH key name
-    instance_type	              EC2 instance type
-    security_group_ids	         Security group IDs
-    ec2_names	                  Instance names
+# GitHub Actions for Infrastructure
 
+The `infra-repo` contains a GitHub Actions workflow responsible for provisioning and configuring infrastructure.
 
-3- **🔐 Security Group Module**
+## GitHub Actions Workflow
 
-📍 Path: modules/security_group
-   
-  Creates:
-   - Security group attached to the VPC
-   
-  Inputs:
+The workflow performs:
 
-    Variable	        Description
-    vpc_id            	VPC ID
-    vpc_cidr	          CIDR for inbound rules
-  
-  Outputs:
-   
-   - 🔑 sg_id
-     
-4-   **☸️ EKS Module**
+1. Checkout infrastructure code
+2. Terraform Init
+3. Terraform Plan
+4. Terraform Apply
+5. Run Ansible Playbooks
 
- 📍 Path: modules/eks
-   
-   Creates:
-   - EKS Cluster
-    
-   - Managed Node Group
-   
-   Inputs:
+---
 
-    Variable                       	Description
-    eks_subnets_ids	             Control plane subnets
-    eks_nodes_subnets_ids	       Node group subnets
-    security_group_ids	          Security groups
-    enable_private_access	       Private API access
-    enable_public_access	        Public API access
-    nodes_ec2_type	Node          instance types
-    node_group_name	             Node group name
-    min_nodes	                   Min nodes
-    max_nodes	                   Max nodes
-    desired_nodes	               Desired nodes
-    k8s_version	                 Kubernetes version
-    cluster_name                 Cluster name
+# Ansible Configuration
 
-5-  **📦 ECR Module**
+After infrastructure provisioning, Ansible configures the environment automatically.
 
-📍 Path: modules/ecr
-  
-  Creates:
-   - Amazon ECR repository
-   
-   Inputs:
-    
-    Variable	             Description
-    ecr_name	           Repository name
-    
-   Outputs:
-   - 📎 Repository URI
+## Ansible Responsibilities
 
+### Jenkins EC2 Configuration
 
-# ⚙️ Variables
-   ```sh
-   variable "region" {}
-   variable "vpc_cidr" {}
-   variable "private_subnets_cidr" {}
-   variable "public_subnets_cidr" {}
-   variable "private_subnets_names" {}
-   variable "public_subnets_names" {}
-   variable "vpc_name" {}
-   variable "igw_name" {}
-   ```
- **📄 terraform.tfvars Example**
-   ```sh
-   region = "eu-north-1"
-   
-   vpc_cidr = "10.44.0.0/16"
-   
-   private_subnets_cidr = [
-     "10.44.1.0/24",
-     "10.44.2.0/24",
-     "10.44.4.0/24"
-   ]
-   
-   public_subnets_cidr = "10.44.3.0/24"
-   
-   private_subnets_names = [
-     "private-subnet-a",
-     "private-subnet-b",
-     "private-subnet-c"
-   ]
-   
-   public_subnets_names = "public-subnet"
-   
-   vpc_name = "eks-vpc"
-   igw_name = "igw"
+* Install Jenkins
+* Install Java
+* Install Docker
+* Install kubectl
+* Install AWS CLI
+* Install ArgoCD CLI
+* Configure Jenkins plugins
 
-   ```
+### Kubernetes Configuration
 
-# 💾 Terraform Backend
-  Remote backend configuration:
-  ```hcl
-   terraform {
-     backend "s3" {
-       bucket         = "terr-statefile-bucket2"
-       key            = "state/file.tfstate"
-       region         = "eu-north-1"
-       dynamodb_table = "lock_table"
-       encrypt        = true
-     }
-   }
-  ```
-3 ▶️ How to Run
-```sh
-terraform init
-terraform plan
-terraform apply
-``` 
+* Install ArgoCD in EKS
+* Configure namespaces
+* Configure ingress
+* Configure Redis deployment
+* Configure application deployments
 
-# 🧹 To destroy:
-```sh
-terraform destroy
+### Networking & Security
+
+* Configure ELB
+* Configure Security Groups
+* Configure IAM permissions
+
+---
+
+# Jenkins CI/CD Pipeline
+
+The Jenkins pipeline runs on an EC2 instance located in the public subnet.
+
+## Pipeline Stages
+
+### 1. Checkout Source Code
+
+Jenkins pulls source code from GitHub.
+
+### 2. Install Dependencies
+
+Example:
+
+```bash
+npm install
 ```
 
-# 🧪 Example Deployment Flow
-   1️⃣ Create VPC
-   
-   2️⃣ Create subnets & IGW
-   
-   3️⃣ Create Security Group
-   
-   4️⃣ Launch EC2 in public subnet
-   
-   5️⃣ Deploy EKS cluster in private subnets
-   
-   6️⃣ Create ECR repository
+### 3. OWASP Dependency Check
+
+Scans dependencies for known vulnerabilities.
+
+### 4. Unit Testing
+
+Example:
+
+```bash
+npm test
+```
+
+### 5. Code Coverage
+
+Generates npm coverage reports.
+
+Example:
+
+```bash
+npm run coverage
+```
+
+### 6. SonarQube Analysis
+
+Runs:
+
+* Static code analysis
+* Coverage analysis
+* Quality Gate validation
+
+### 7. Build Docker Image
+
+Example:
+
+```bash
+docker build -t app-image .
+```
+
+### 8. Push Docker Image to Amazon ECR
+
+Example:
+
+```bash
+docker push <ecr-image>
+```
+
+### 9. Update Kubernetes Manifests
+
+Updates image tags inside Kubernetes deployment manifests.
+
+### 10. Publish Reports
+
+Reports published in Jenkins:
+
+* Test reports
+* Coverage reports
+* OWASP reports
+* SonarQube reports
+
+---
+
+# GitOps Deployment with ArgoCD
+
+ArgoCD continuously monitors the Kubernetes manifests repository.
+
+## Workflow
+
+1. Jenkins updates Kubernetes manifests.
+2. Changes are pushed to `k8s-repo`.
+3. ArgoCD detects updates automatically.
+4. ArgoCD syncs manifests.
+5. Updated workloads are deployed to EKS.
+
+---
+
+# Redis Deployment
+
+Redis is deployed inside the EKS cluster.
+
+## Redis Usage
+
+Redis is used for:
+
+* Caching
+* Session storage
+* Performance optimization
+
+The Redis deployment runs across the EKS environment for high availability.
+
+---
+
+# Application Access Flow
+
+Users access the application using:
+
+```text
+Users → ELB → Kubernetes Ingress → Application Service → Pods
+```
+
+---
+
+# Security & Quality Controls
+
+## Security
+
+* OWASP Dependency Check
+* IAM least privilege access
+* Private EKS worker nodes
+* Kubernetes RBAC
+* Security Groups
+
+## Quality
+
+* SonarQube Quality Gates
+* Unit Testing
+* Coverage validation
+* Automated CI/CD checks
+
+---
+
+# Tools & Technologies
+
+| Category                 | Technologies            |
+| ------------------------ | ----------------------- |
+| CI/CD                    | Jenkins, GitHub Actions |
+| IaC                      | Terraform               |
+| Configuration Management | Ansible                 |
+| Containers               | Docker                  |
+| Orchestration            | Kubernetes, EKS         |
+| GitOps                   | ArgoCD                  |
+| Registry                 | Amazon ECR              |
+| Cloud                    | AWS                     |
+| Security                 | OWASP Dependency Check  |
+| Code Quality             | SonarQube               |
+| Cache                    | Redis                   |
+
+---
+
+# Deployment Flow Summary
+
+```text
+Developer Push → GitHub → Jenkins Pipeline → Security & Quality Checks
+→ Docker Build → Amazon ECR → Update K8s Manifests
+→ ArgoCD Sync → Amazon EKS Deployment → ELB → Users
+```
+
+---
+
+# Future Improvements
+
+Potential future enhancements:
+
+* Prometheus & Grafana monitoring
+* Helm charts
+* Blue/Green deployments
+* Canary deployments
+* Kubernetes autoscaling
+* Secrets management with Vault
+* Service mesh integration
+* Multi-environment deployments
+
+---
+
+# Learning Objectives
+
+This project demonstrates:
+
+* CI/CD implementation
+* GitOps workflows
+* Kubernetes deployments
+* AWS cloud infrastructure
+* Infrastructure as Code
+* Configuration management
+* Security scanning
+* Automated deployments
+* Cloud-native DevOps practices
+
+---
