@@ -1,4 +1,5 @@
-#  🚀Terraform AWS Infrastructure Deployment 
+#    🟪
+#  🟪🟪🟪 Tetris Game Full Deployment    
 
 This project deploys a complete AWS infrastructure including VPC, EC2 instance, Security Groups, EKS cluster, and ECR repository using Terraform. The deployment uses modules for reusability and stores state securely in S3 with DynamoDB for locking.
  Terraform AWS Infrastructure – Detailed Documentation
