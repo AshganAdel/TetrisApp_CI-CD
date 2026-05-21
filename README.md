@@ -21,8 +21,8 @@ This project demonstrates a complete end-to-end DevOps platform using:
 * Kubernetes
 
 This repo is only for the CI/CD part.
-Infrastructure repository: https://github.com/tetris-app1/infra.git
-K8s repo: https://github.com/tetris-app1/Application_Repo.git
+Infrastructure repository: https://github.com/tetris-app1/infra.git.
+K8s repo: https://github.com/tetris-app1/Application_Repo.git.
 
 The platform automates:
 
