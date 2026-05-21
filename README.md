@@ -1,5 +1,3 @@
-#   Full Deployment    
-
 # 🟪🟪🟪 Tetris Game CI/CD & GitOps Deployment on AWS EKS
 
 ## Overview
@@ -20,9 +18,9 @@ This project demonstrates a complete end-to-end DevOps platform using:
 * Redis
 * Kubernetes
 
-This repo is only for the CI/CD part.
-Infrastructure repository: https://github.com/AshganAdel/infra.git.
-K8s repo: https://github.com/tetris-app1/Application_Repo.git.
+This repo is only for the CI/CD part.  
+Infrastructure repository: https://github.com/AshganAdel/infra.git.  
+K8s repo: https://github.com/tetris-app1/Application_Repo.git.  
 
 The platform automates:
 
