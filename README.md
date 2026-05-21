@@ -21,7 +21,7 @@ This project demonstrates a complete end-to-end DevOps platform using:
 * Kubernetes
 
 This repo is only for the CI/CD part.
-Infrastructure repository: https://github.com/tetris-app1/infra.git.
+Infrastructure repository: https://github.com/AshganAdel/infra.git.
 K8s repo: https://github.com/tetris-app1/Application_Repo.git.
 
 The platform automates:
@@ -68,23 +68,15 @@ Infrastructure provisioning is fully automated using Terraform custom modules an
 
 ```bash
 .
-├── app-repo/                  # Application source code
+├── TetrisApp_CI-CD/           # Application source code & Jenkinsfile
+│   ├── Jenkinsfile            # Jenkins CI/CD pipeline
 ├── infra-repo/                # Terraform + Ansible infrastructure code
+│   ├── terraform
+│   ├── ansible
+│   ├── .github/workflows      # infra pipeline 
 ├── k8s-repo/                  # Kubernetes manifests
-├── Jenkinsfile                # Jenkins CI/CD pipeline
-├── terraform/
-│   ├── modules/
-│   │   ├── vpc/
-│   │   ├── eks/
-│   │   ├── ec2/
-│   │   ├── ecr/
-│   │   └── iam/
-│   └── environments/
-├── ansible/
-│   ├── playbooks/
-│   ├── roles/
-│   └── inventory/
-└── README.md
+│   ├── apps/k8sfilesapp1     
+
 ```
 
 ---
@@ -225,21 +217,12 @@ After infrastructure provisioning, Ansible configures the environment automatica
 * Install kubectl
 * Install AWS CLI
 * Install ArgoCD CLI
-* Configure Jenkins plugins
 
 ### Kubernetes Configuration
 
 * Install ArgoCD in EKS
 * Configure namespaces
-* Configure ingress
-* Configure Redis deployment
 * Configure application deployments
-
-### Networking & Security
-
-* Configure ELB
-* Configure Security Groups
-* Configure IAM permissions
 
 ---
 
@@ -340,14 +323,6 @@ ArgoCD continuously monitors the Kubernetes manifests repository.
 
 Redis is deployed inside the EKS cluster.
 
-## Redis Usage
-
-Redis is used for:
-
-* Caching
-* Session storage
-* Performance optimization
-
 The Redis deployment runs across the EKS environment for high availability.
 
 ---
@@ -437,3 +412,15 @@ This project demonstrates:
 * Cloud-native DevOps practices
 
 ---
+
+# Author
+
+Developed as part of DevOps Training Program Group project :
+
+    Ashgan Adel
+    Lina Mohamed
+    shymaa saeed
+    Merna Eltahawy
+    
+    
+
