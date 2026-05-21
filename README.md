@@ -18,10 +18,6 @@ This project demonstrates a complete end-to-end DevOps platform using:
 * Redis
 * Kubernetes
 
-This repo is only for the CI/CD part.  
-Infrastructure repository: https://github.com/AshganAdel/infra.git.  
-K8s repo: https://github.com/tetris-app1/Application_Repo.git.  
-
 The platform automates:
 
 * Infrastructure provisioning
@@ -66,17 +62,16 @@ Infrastructure provisioning is fully automated using Terraform custom modules an
 
 ```bash
 .
-├── TetrisApp_CI-CD/           # Application source code & Jenkinsfile
-│   ├── Jenkinsfile            # Jenkins CI/CD pipeline
-├── infra-repo/                # Terraform + Ansible infrastructure code
+TetrisApp_CI-CD/           
 │   ├── terraform
 │   ├── ansible
-│   ├── .github/workflows      # infra pipeline 
-├── k8s-repo/                  # Kubernetes manifests
-│   ├── apps/k8sfilesapp1     
+│   ├── tetris-backend             # backend service + Jenkinsfile
+│   ├── tetris-frontend            # frontend service + Jenkinsfile
+│   ├── monitoring
+│   ├── .github/workflows          # infra pipeline to run terraform & ansible
+│   ├── k8s/apps/k8sfilesapp1      # Kubernetes manifests
 
 ```
-
 ---
 
 # Infrastructure Architecture
