@@ -20,6 +20,10 @@ This project demonstrates a complete end-to-end DevOps platform using:
 * Redis
 * Kubernetes
 
+This repo is only for the CI/CD part.
+Infrastructure repository: https://github.com/tetris-app1/infra.git
+K8s repo: https://github.com/tetris-app1/Application_Repo.git
+
 The platform automates:
 
 * Infrastructure provisioning
@@ -50,11 +54,11 @@ The architecture follows GitOps and Infrastructure as Code (IaC) practices for s
    * Runs SonarQube analysis & quality gates
    * Builds Docker image
    * Pushes image to Amazon ECR
-   * Updates Kubernetes manifests
+   * Updates Kubernetes manifests in K8s repo
    * Publishes reports in Jenkins
 4. ArgoCD detects manifest changes.
 5. ArgoCD deploys application updates to Amazon EKS.
-6. Users access the application through ELB + Kubernetes Ingress.
+6. Users access the application through ELB.
 
 Infrastructure provisioning is fully automated using Terraform custom modules and configured using Ansible.
 
